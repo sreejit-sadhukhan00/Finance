@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Raleway } from "next/font/google";
 import "./globals.css";
 import Footer from "@/component/Footer";
 import Header from "@/component/Header";
 import { ClerkProvider } from "@clerk/nextjs";
-const inter = Inter({
-  subsets: ["latin"],
-});
+const raleway = Raleway({ 
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900']
+})
+
 
 export const metadata: Metadata = {
   title: "Finance Tracker",
@@ -23,11 +25,11 @@ export default function RootLayout({
 
     <html lang="en">
       <body
-        className={`${inter.className}`}
+        className={`${raleway.className}`}
       >
            {/* header */}
             <Header/>
-        <main className="min-h-screen ">
+        <main className="min-h-screen pt-30">
           {children} 
         </main>
          <Footer/>
