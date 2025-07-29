@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Raleway } from "next/font/google";
 import "./globals.css";
+import  Header  from '@/component/header/Headerserver'
 import Footer from "@/component/Footer";
-import Header from "@/component/Header";
 import { ClerkProvider } from "@clerk/nextjs";
 const raleway = Raleway({ 
   subsets: ['latin'],
@@ -22,19 +22,19 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-
-    <html lang="en">
-      <body
-        className={`${raleway.className}`}
-      >
-           {/* header */}
-            <Header/>
-        <main className="min-h-screen pt-30">
-          {children} 
-        </main>
-         <Footer/>
-      </body>
-    </html>
+      <html lang="en">
+        <body
+          className={`${raleway.className}`}
+          suppressHydrationWarning={true} // Add this line
+        >
+          {/* header */}
+          <Header/>
+          <main className="min-h-screen pt-30">
+            {children} 
+          </main>
+          <Footer/>
+        </body>
+      </html>
     </ClerkProvider>
   );
 }
