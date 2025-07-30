@@ -4,6 +4,7 @@ import "./globals.css";
 import  Header  from '@/component/header/Headerserver'
 import Footer from "@/component/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner"
 const raleway = Raleway({ 
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800', '900']
@@ -33,6 +34,7 @@ export default function RootLayout({
             {children} 
           </main>
           <Footer/>
+           <Toaster richColors/>
         </body>
       </html>
     </ClerkProvider>

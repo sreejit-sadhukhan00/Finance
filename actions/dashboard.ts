@@ -15,11 +15,14 @@ export interface CreateAccountData {
     isDefault: boolean;
 }
 
-const serializeTransaction = (transaction: any) => {
-     const serialized={...transaction};
+const serializeTransaction = (obj: any) => {
+     const serialized={...obj};
 
-     if(transaction.balance){
-        serialized.balance=transaction.balance.toNumber();
+     if(obj.balance){
+        serialized.balance=obj.balance.toNumber();
+     }
+     if(obj.amount){
+        serialized.amount=obj.amount.toNumber();
      }
      return serialized;
 }
@@ -86,4 +89,38 @@ export async function createAccount(data:CreateAccountData){
     console.error("Error creating account:", err);
     return {success:false, error: err instanceof Error ? err.message : "Unknown error occurred"};
   }
+}
+
+export async function getAccounts() {
+    const {userId}=await auth();
+    if(!userId) throw new Error("User not authenticated");
+
+    const user=await db.user.findUnique({
+        where:{
+            clerkUserId:userId
+        },
+        select:{
+            id:true
+        }
+    });
+    if(!user) throw new Error("User not found");
+    
+    const accounts=await db.account.findMany({
+        where:{
+            userId:user.id
+        },
+        orderBy:{
+            createdAt:'desc'
+        },
+        include:{
+            _count:{
+                select:{
+                    transactions:true
+                },
+            },
+        },
+
+    });
+    const serializedAccounts = accounts.map(serializeTransaction);
+    return {success:true, data: serializedAccounts};
 }

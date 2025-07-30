@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Wallet } from 'lucide-react' // Added icon import
+import React, { useEffect, useState } from 'react'
+import { Loader2, Wallet } from 'lucide-react' // Added icon import
 import {
   Drawer,
   DrawerClose,
@@ -20,6 +20,9 @@ import z from 'zod';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import useFetch from '@/hooks/use-fetch';
+import { createAccount } from '@/actions/dashboard';
+import { toast } from 'sonner';
 function CreateAccountDrawer({children}: {children: React.ReactNode}) {
 
 const {register,
@@ -41,35 +44,31 @@ const {register,
 
 const[open,setopen] =useState(false);
 
+const{data:newAccount,error,
+  fn:createaccountfn,
+  loading:createAccountload
+}=useFetch(createAccount)
+
+// success and error handling
+useEffect(() => {
+  if(newAccount && !createAccountload){
+    toast.success("Account created successfully");
+    reset();
+    setopen(false);
+  }
+}, [createAccountload, newAccount]);
+useEffect(() => {
+  if(error){
+    toast.error(error.message || "An error occurred while creating account");
+    reset();
+    setopen(false);
+  }
+}, [error]);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ const handleformSubmit= async(data: any)=>{
+ await createaccountfn(data)
+}
 
   return (
     <Drawer open={open} onOpenChange={setopen}>
@@ -80,7 +79,9 @@ const[open,setopen] =useState(false);
           <DrawerTitle className="text-2xl font-bold">Create New Account</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 py-2"> {/* Added padding */}
-          <form className="space-y-4"> {/* Added vertical spacing */}
+          <form className="space-y-4"
+            onSubmit={handleSubmit(handleformSubmit)}
+          > {/* Added vertical spacing */}
             {/* name */}
             <div className="space-y-2"> {/* Added spacing between label and input */}
               <label htmlFor="name" className="text-md  font-medium">Account Name</label>
@@ -147,15 +148,22 @@ const[open,setopen] =useState(false);
             {/* Added form actions */}
             <div className="flex justify-end space-x-2 pt-2">
               <DrawerClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button type='button' variant="outline">Cancel</Button>
               </DrawerClose>
-              <Button type="submit">Create Account</Button>
+              <Button type="submit"
+              disabled={createAccountload}>
+                {createAccountload ? (<><Loader2
+                className='font-bold h-4 w-4 animate-spin text-lg'
+                /><span className='text-lg'>creating</span><span className='ml-[-2]
+                animate-pulse text-lg font-semibold
+                '>...</span></>) : "Create Account"}
+              </Button>
             </div>
           </form>
         </div>
       </DrawerContent>
     </Drawer>
-   
+              
   )
 }
 
