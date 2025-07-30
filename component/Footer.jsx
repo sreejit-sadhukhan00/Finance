@@ -2,7 +2,7 @@ import { Github, Mail, Heart, TrendingUp, Shield, Users } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 border-t border-slate-200/50">
+    <footer className="bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 border-t border-slate-200/50 mt-8">
       <div className="max-w-7xl mx-auto px-6 py-4">
         {/* Main Footer Content - Two Sections Side by Side */}
         <div className="grid grid-cols-2 md:grid-cols-2 gap-8 mb-4 ">

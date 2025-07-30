@@ -2,7 +2,7 @@ export interface Account {
     id: string;
     name: string;
     type: 'CURRENT' | 'SAVINGS';
-    balance: number;
+    balance: string;
     isDefault: boolean;
     userId: string;
     createdAt: Date;
