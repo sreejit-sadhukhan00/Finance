@@ -2,47 +2,175 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { format } from 'date-fns';
-import {  Clock1, IndianRupee, MoreHorizontal, RefreshCw } from 'lucide-react';
-import React from 'react'
+import {  ChevronDown, ChevronUp, Clock1, IndianRupee, MoreHorizontal, RefreshCw, SearchIcon, Trash, X } from 'lucide-react';
+import React, { useMemo, useState } from 'react'
 import { categoryColors, Category, CategoryType } from '@/data/Categories';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import {  useRouter } from  'next/navigation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const recurringInterval={
-  DAILY: 'Daily',
-  WEEKLY: 'Weekly',
-  MONTHLY: 'Monthly',
-  YEARLY: 'Yearly',
-}
+
 function Transactiontable({transactions}: {transactions: any[]} ) {
-  const filteredandSortedTransactions = transactions;
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [searchterm, setSearchTerm] = useState("");
+  const [typefilter,settypefilter]=useState("");
+  const [recurringFilter,setrecurringFilter]=useState("");
 
+
+
+  const[sortconfig,setsortconfig]=useState({
+    field:"date",
+    direction:"asc"
+  });
+
+
+
+
+
+  const filteredandSortedTransactions = useMemo(()=>{
+       let result=[...transactions];
+        //  search filter
+        console.log("Search Term:", searchterm);
+        if (searchterm) {
+        const newsearchterm = searchterm.toLowerCase();
+        result= result.filter((transac) =>(
+            transac.description.toLowerCase().includes(newsearchterm)) ||
+            transac.category.toLowerCase().includes(newsearchterm)
+        );
+    }
+      
+        return result;
+  },[transactions, searchterm]);
+  
+  const router=useRouter();
   // filtering function
-    const handlesort=({ })=>{
+    const handlesort=({field}: {field: string})=>{
+      console.log(field);
+          setsortconfig(current=>({
+           field: field,
+            direction:current.field==field && current.direction==='asc' ? 'desc':'asc'
+          }));
+        }
 
-      }
+   const handleSelect=(id:string)=>{
+     setSelectedIds(current=>current.includes(id)?current.filter(item=>item!=id):[...current,id])
+   }
+   const handleSelectAll=()=>{
+     if(selectedIds.length === transactions.length
+      && transactions.length >0
+     ){
+      setSelectedIds([]);
+     }
+     else{
+      setSelectedIds(transactions.map(transaction=>transaction.id));
+     }
+   }
+
+
+  const handleBulkDelete=()=>{
+
+  }
+
+
+
+
+
+
+
 
 
   return (
-    <div className=''>
+    <div className='space-y-4'>
      
-        {/* filters */}
+        {/* ===== Filters Section Start ===== */}
+<div className='mt-6 flex flex-col gap-4 lg:flex-row lg:items-center transition-all duration-300 ease-in-out'>
+    {/* Search Input */}
+    <div className='flex-1 group transition-all duration-200'>
+        <div className='flex items-center relative'>
+            <SearchIcon className='absolute h-4 w-4 text-muted-foreground ml-3 transition-transform group-hover:scale-110'/>
+            <input 
+                type='text' 
+                className='pl-10 w-full pt-3 pb-2 rounded-md border-gray-200 focus:border-primary 
+                         transition-all duration-200 hover:shadow-sm focus:shadow-md
+                         focus:ring-2 focus:ring-primary/20'
+                placeholder='Search transactions...'
+                value={searchterm}
+                onChange={(e)=>setSearchTerm(e.target.value)}
+            />
+        </div>
+    </div>
+      
+    {/* Filter Selects */}
+    <div className='flex flex-wrap items-center gap-3 transition-all duration-300'>
+        <Select value={typefilter} onValueChange={(value)=>settypefilter(value)}>
+            <SelectTrigger className="w-full sm:w-[150px] hover:shadow-sm transition-all duration-200">
+                <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="INCOME">Income</SelectItem>
+                <SelectItem value="EXPENSE">Expense</SelectItem>
+            </SelectContent>
+        </Select>
 
-        {/* transactions */}
+        <Select value={recurringFilter} onValueChange={(value)=>setrecurringFilter(value)}>
+            <SelectTrigger className="w-full sm:w-[180px] hover:shadow-sm transition-all duration-200">
+                <SelectValue placeholder="All Transactions" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="recurring">Recurring only</SelectItem>
+                <SelectItem value="non-recurring">Non-Recurring Only</SelectItem>
+            </SelectContent>
+        </Select>
+
+        {selectedIds.length > 0 && (
+            <Button
+                variant='destructive'
+                className='h-8 px-4 text-sm font-medium'
+                onClick={handleBulkDelete}
+            >
+                <Trash className='w-4 h-4 mr-2' />
+                Delete Selected ({selectedIds.length})
+            </Button>
+        )}
+
+        {(searchterm || typefilter || recurringFilter) && (
+            <Button 
+                onClick={()=>{
+                    setSearchTerm('');
+                    settypefilter('');
+                    setrecurringFilter('');
+                    setSelectedIds([]);
+                }}
+                variant='outline'
+                size='icon'
+            >
+                <X className='w-4 h-4 text-center block font-extrabold' />
+            </Button>
+        )}
+    </div>
+</div>
+{/* ===== Filters Section End ===== */}
+
+    {/* transactions */}
        <div className='mt-6'>
          <Table>
 
   <TableHeader>
     <TableRow>
       <TableHead className="w-[50px]">
-        <Checkbox/>
+        <Checkbox  checked={selectedIds.length==transactions.length} onCheckedChange={()=>handleSelectAll()}/>
       </TableHead>
       <TableHead className="cursor-pointer"
-      onClick={()=>handlesort("date")}
+      onClick={()=>handlesort({field: "date"})}
       >
-        <div className='flex items-center '>Date</div>
+        <div className='flex items-center '>Date
+          {sortconfig.field === 'date' &&(
+            sortconfig.direction === 'asc' ? <ChevronUp className='w-4 h-4 ml-2' /> : <ChevronDown className='w-4 h-4 ml-2' />
+          )}
+        </div>
         
       </TableHead>
 
@@ -51,16 +179,24 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
       </TableHead>
       
       <TableHead className="cursor-pointer"
-      onClick={()=>handlesort("category")}
+      onClick={()=>handlesort({field: "category"})}
       ><div className='flex items-center'>
-        Category
+        Category  
+        {sortconfig.field === 'category' &&(
+            sortconfig.direction === 'asc' ? <ChevronUp className='w-4 h-4 ml-2' /> : <ChevronDown className='w-4 h-4 ml-2' />
+          )}
         </div></TableHead>
 
 
       <TableHead className="cursor-pointer"
-      onClick={()=>handlesort("amount")}
+      onClick={()=>handlesort({field: "amount"})}
       >
-        <div className='flex items-center justify-end'>Amount</div>
+        <div className='flex items-center justify-end'>
+          Amount
+{sortconfig.field === 'amount' &&(
+            sortconfig.direction === 'asc' ? <ChevronUp className='w-4 h-4 ml-2' /> : <ChevronDown className='w-4 h-4 ml-2' />
+          )}
+        </div>
       </TableHead>
 
       <TableHead className=''>Recurring</TableHead>
@@ -80,7 +216,7 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
 
     <TableRow key={index}>
       <TableCell className="font-medium">
-        <Checkbox />
+        <Checkbox checked={selectedIds.includes(transaction.id)} onCheckedChange={()=>handleSelect(transaction.id)}/>
       </TableCell>
       <TableCell>{format(new Date(transaction.date),"PP")}</TableCell>
       <TableCell>{transaction.description}</TableCell>
@@ -135,19 +271,23 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
 
           <TableCell>
             <DropdownMenu>
-  <DropdownMenuTrigger>
+  <DropdownMenuTrigger asChild>
     <Button className='h-8 w-8 p-0 rounded-full' variant="ghost">
 
       <MoreHorizontal className='h-4 w-4'/>
     </Button>
   </DropdownMenuTrigger>
   <DropdownMenuContent>
-    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+    <DropdownMenuItem
+      onClick={()=>
+        router.push(`/transaction/create?edit=${transaction.id}`)
+      }
+    >Edit</DropdownMenuItem>
     <DropdownMenuSeparator />
-    <DropdownMenuItem>Profile</DropdownMenuItem>
-    <DropdownMenuItem>Billing</DropdownMenuItem>
-    <DropdownMenuItem>Team</DropdownMenuItem>
-    <DropdownMenuItem>Subscription</DropdownMenuItem>
+    <DropdownMenuItem className='text-destructive'
+    // bulk dlete function 
+    // onClick={()=>deletefn([transaction.id])}
+    >Delete</DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>
           </TableCell>
