@@ -3,7 +3,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { format } from 'date-fns';
 import {  ChevronDown, ChevronUp, Clock1, IndianRupee, MoreHorizontal, RefreshCw, SearchIcon, Trash, X } from 'lucide-react';
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { categoryColors, Category, CategoryType } from '@/data/Categories';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from '@/components/ui/button';
 import {  useRouter } from  'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import useFetch from '@/hooks/use-fetch';
+import { deleteTransactions } from '@/actions/Account';
+import { toast } from 'sonner';
+import { BarLoader } from 'react-spinners';
 
 
 function Transactiontable({transactions}: {transactions: any[]} ) {
@@ -18,6 +22,14 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
   const [searchterm, setSearchTerm] = useState("");
   const [typefilter,settypefilter]=useState("");
   const [recurringFilter,setrecurringFilter]=useState("");
+
+
+ const{
+  loading: deleteLoading,
+  error: deleteError,
+  fn:deletefn,
+  data: deleteData
+ }= useFetch(deleteTransactions);
 
 
 
@@ -33,7 +45,6 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
   const filteredandSortedTransactions = useMemo(()=>{
        let result=[...transactions];
         //  search filter
-        console.log("Search Term:", searchterm);
         if (searchterm) {
         const newsearchterm = searchterm.toLowerCase();
         result= result.filter((transac) =>(
@@ -41,14 +52,48 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
             transac.category.toLowerCase().includes(newsearchterm)
         );
     }
-      
+    //  recurring filter 
+        if(recurringFilter){
+          
+           if(recurringFilter ==='recurring'){
+            result=result.filter((transac)=>transac.isRecurring===true)
+           }
+           if(recurringFilter ==='non-recurring'){
+            result=result.filter((transac)=>transac.isRecurring===false)
+           }
+        }
+      // type filter 
+         if(typefilter){
+              result=result.filter((transac)=>transac.type === typefilter);
+         }
+
+        //  sorting 
+           result.sort((a,b)=>{
+             let comparison=0;
+             switch (sortconfig.field) {
+              case "date":
+                comparison=new Date(a.date).getTime()-new Date(b.date).getTime();
+                   break;
+              case "amount":
+                comparison=a.amount-b.amount;
+                break;
+
+                case "category":
+                comparison=a.category.localeCompare(b.category);
+                break;
+
+              default:
+                comparison=0
+                break;
+             }
+             return sortconfig.direction === 'asc' ? comparison : -comparison;
+           })
         return result;
-  },[transactions, searchterm]);
+  },[transactions, searchterm, recurringFilter, typefilter, sortconfig]);
   
   const router=useRouter();
   // filtering function
     const handlesort=({field}: {field: string})=>{
-      console.log(field);
           setsortconfig(current=>({
            field: field,
             direction:current.field==field && current.direction==='asc' ? 'desc':'asc'
@@ -70,12 +115,22 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
    }
 
 
-  const handleBulkDelete=()=>{
-
+  const handleBulkDelete=async ()=>{
+      if(!window.confirm("Are you sure you want to delete these transactions? This action cannot be undone."))
+          {
+            return;
   }
-
-
-
+   deletefn(selectedIds);
+}
+  useEffect(()=>{
+     if(deleteData && !deleteLoading){
+       setSelectedIds([]);
+       toast.success("Transactions deleted successfully");
+     }
+      if(deleteError && !deleteLoading){
+        toast.error("Failed to delete transactions: " );
+      }
+  },[deleteLoading,deleteData,deleteError])
 
 
 
@@ -84,7 +139,8 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
 
   return (
     <div className='space-y-4'>
-     
+     <BarLoader className='mt-4' color='#4f46e5' 
+     loading={deleteLoading} width='100%' height={3} />
         {/* ===== Filters Section Start ===== */}
 <div className='mt-6 flex flex-col gap-4 lg:flex-row lg:items-center transition-all duration-300 ease-in-out'>
     {/* Search Input */}
@@ -143,6 +199,7 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
                     settypefilter('');
                     setrecurringFilter('');
                     setSelectedIds([]);
+                    
                 }}
                 variant='outline'
                 size='icon'
@@ -286,7 +343,7 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
     <DropdownMenuSeparator />
     <DropdownMenuItem className='text-destructive'
     // bulk dlete function 
-    // onClick={()=>deletefn([transaction.id])}
+    onClick={()=>deletefn([transaction.id])}
     >Delete</DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>
