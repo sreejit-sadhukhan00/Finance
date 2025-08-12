@@ -24,7 +24,7 @@ export async function GetCurrentBudget({accountId}: { accountId: string }) {
         }
       });
         if (!budget) {
-            throw new Error("Budget not found");
+            // throw new Error("Budget not found");
         }
 
        const currdate=new Date();
