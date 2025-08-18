@@ -14,19 +14,19 @@ interface accountprops{
 
 
 async function Account({params}: accountprops) {
-    const accountData=await accountWithTransactions(params.id);
+    const accountData=await accountWithTransactions(params?.id);
     if(!accountData){
         notFound();
     }
     const {transactions,...account}=accountData
-     
+     console.log(accountData);
   return (
     <div className='container mx-auto py-8 px-6'>
       <div className='bg-white rounded-lg shadow-md p-6 flex justify-between items-center'>
         <div className='space-y-2'>
           <h1 className='text-3xl font-bold font-serif text-gray-800'>{account?.name}</h1>
           <p className='text-foreground font-serif font-medium'>
-            {account.type.charAt(0) + account.type.slice(1).toLowerCase()} Account
+            {account.type?.charAt(0) + account.type?.slice(1).toLowerCase()} Account
           </p>
         </div>
 
@@ -35,7 +35,7 @@ async function Account({params}: accountprops) {
             ${parseFloat(account.balance).toFixed(2)}
           </div>
           <p className='text-md text-muted-foreground'>
-            {account._count.transactions} Transactions
+            {account._count?.transactions} Transactions
           </p>
         </div>
       </div>

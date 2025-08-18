@@ -275,7 +275,11 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
       <TableCell className="font-medium">
         <Checkbox checked={selectedIds.includes(transaction.id)} onCheckedChange={()=>handleSelect(transaction.id)}/>
       </TableCell>
-      <TableCell>{format(new Date(transaction.date),"PP")}</TableCell>
+      <TableCell>
+        {transaction?.date 
+          ? format(new Date(transaction.date), "PP")
+          : "Invalid date"}
+      </TableCell>
       <TableCell>{transaction.description}</TableCell>
       <TableCell className='capitalize' >
         <span style={{

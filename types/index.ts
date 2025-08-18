@@ -34,3 +34,12 @@ export interface Transaction {
     createdAt: Date;
     updatedAt: Date;
 }
+
+
+export interface ScannedReceipt {
+    amount: number;
+    date: Date;
+    description: string;
+    merchantName: string;
+    category: string;
+}
