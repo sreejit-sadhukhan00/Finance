@@ -69,10 +69,10 @@ export async function createTransaction(data:any) {
                 data:{
                     ...data,
                     userId:user.id,
-                    nextRecurringDate:data.isRecurring && data.RecurringInterval ? calculateRecurringDate(data.date,data.RecurringInterval) : null,
+                    nextRecurringDate:data.isRecurring && data.recurringInterval ? calculateRecurringDate(data.date,data.recurringInterval) : null,
                 }
              });
-
+       console.log("New Transaction Created:",calculateRecurringDate(data.date,data.recurringInterval) );
                 await tx.account.update({
                     where:{
                         id:account.id
@@ -95,6 +95,7 @@ export async function createTransaction(data:any) {
 }
 
 function calculateRecurringDate(startDate: string | Date, Interval: string){
+    console.log(startDate, Interval);
    const date = new Date(startDate);
     switch(Interval) {
         case 'DAILY':
@@ -112,6 +113,7 @@ function calculateRecurringDate(startDate: string | Date, Interval: string){
         default:
             throw new Error("Invalid interval");
     }
+    console.log(date);
     return date;
 }
 

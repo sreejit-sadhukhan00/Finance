@@ -68,15 +68,6 @@ const{register,setValue,handleSubmit,formState:{errors},watch,getValues,reset}= 
       router.push(`/account/${transactiondata.data.accountId}`);
     }
  },[transactiondata,transactionloading]);
- useEffect(()=>{
-    if(!transactiondata?.success && !transactionloading){
-      reset();
-      toast.error('Failed to add transaction. Please try again.');
-      
-    }
- },[transactiondata,transactionloading]);
-
- const category= watch('category');
  const handleScanComplete = async (scannedData: ScannedReceipt) => {
     console.log("Scanned Data:", scannedData);
 
@@ -293,7 +284,7 @@ const{register,setValue,handleSubmit,formState:{errors},watch,getValues,reset}= 
                             </label>
                             <Select
                                 onValueChange={(value: any) => setValue('recurringInterval', value)}
-                                defaultValue={getValues('recurringInterval') || 'MONTHLY'}
+                                defaultValue={getValues('recurringInterval') || ''}
                             >
                                 <SelectTrigger className="w-full md:w-[180px] transition-all duration-200 hover:border-blue-500">
                                     <SelectValue placeholder="Select Interval" />

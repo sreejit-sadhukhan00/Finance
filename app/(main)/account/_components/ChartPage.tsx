@@ -32,7 +32,6 @@ function ChartPage({transactions}: {transactions: Transaction[]}) {
   const [dateRange, setDateRange] = useState<DateRangeKey>("3M");
   
 const filteredData=useMemo(()=>{
-  console.log(dateRange);
     // get the date range based on the selected dateRange
     const range:typeof DATE_RANGES[DateRangeKey]= DATE_RANGES[dateRange];
     const now = new Date();

@@ -19,7 +19,6 @@ async function Account({params}: accountprops) {
         notFound();
     }
     const {transactions,...account}=accountData
-     console.log(accountData);
   return (
     <div className='container mx-auto py-8 px-6'>
       <div className='bg-white rounded-lg shadow-md p-6 flex justify-between items-center'>
