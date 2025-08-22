@@ -14,6 +14,7 @@ interface accountprops{
 
 
 async function Account({params}: accountprops) {
+  console.log(params.id)
     const accountData=await accountWithTransactions(params?.id);
     if(!accountData){
         notFound();

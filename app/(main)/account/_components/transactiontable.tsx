@@ -23,6 +23,17 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
   const [typefilter,settypefilter]=useState("");
   const [recurringFilter,setrecurringFilter]=useState("");
 
+  // to get random color for category badge
+function getRandomColor() {
+  // Generate a random hex color
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
 
  const{
   loading: deleteLoading,
@@ -35,7 +46,7 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
 
   const[sortconfig,setsortconfig]=useState({
     field:"date",
-    direction:"asc"
+    direction:"desc"
   });
 
 
@@ -122,6 +133,7 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
   }
    deletefn(selectedIds);
 }
+
   useEffect(()=>{
      if(deleteData && !deleteLoading){
        setSelectedIds([]);
@@ -131,10 +143,6 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
         toast.error("Failed to delete transactions: " );
       }
   },[deleteLoading,deleteData,deleteError])
-
-
-
-
 
 
   return (
@@ -283,7 +291,7 @@ function Transactiontable({transactions}: {transactions: any[]} ) {
       <TableCell>{transaction.description}</TableCell>
       <TableCell className='capitalize' >
         <span style={{
-          background: categoryColors[transaction.category] || '#f0f0f0',
+          background: getRandomColor(),
         }}
          className='px-2 py-2 rounded-md text-md font-semibold text-white'
         >
